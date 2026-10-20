@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Integral de Calidad - 3 KPIs Clave</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #090d16; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .tab-btn.active {
+            background-color: #4f46e5;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col bg-slate-950 text-slate-100 overflow-x-hidden">
+
+    <!-- HEADER / ENCABEZADO -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-indigo-600/20 text-indigo-400 rounded-lg border border-indigo-500/30">
+                    <i data-lucide="shield-alert" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-white leading-tight">Dashboard Integral de Calidad</h1>
+                    <p class="text-xs text-slate-400">Monitoreo de KPIs: Toneladas Retenidas, Reclamaciones e Inventario NC</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-semibold rounded-full border border-emerald-500/20">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Gestión 2025 - 2026 | Metas Calidad Fijas
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- PESTAÑAS DE NAVEGACIÓN RÁPIDA -->
+    <nav class="bg-slate-900/60 border-b border-slate-800/80 px-4 sm:px-6 lg:px-8 py-2.5">
+        <div class="max-w-7xl mx-auto flex flex-wrap gap-2 justify-between items-center">
+            <div class="flex flex-wrap gap-2">
+                <button onclick="switchTab('tab-all')" id="btn-tab-all" class="tab-btn active px-4 py-1.5 text-xs font-semibold rounded-lg text-slate-300 hover:text-white transition-all flex items-center gap-2">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Vista Consolidada General
+                </button>
+                <button onclick="switchTab('tab-kpi1')" id="btn-tab-kpi1" class="tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-slate-300 hover:text-white transition-all flex items-center gap-2">
+                    <i data-lucide="factory" class="w-4 h-4"></i> KPI 1: % Ton Retenidas
+                </button>
+                <button onclick="switchTab('tab-kpi2')" id="btn-tab-kpi2" class="tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-slate-300 hover:text-white transition-all flex items-center gap-2">
+                    <i data-lucide="message-square-warning" class="w-4 h-4"></i> KPI 2: Reclamaciones Procedentes
+                </button>
+                <button onclick="switchTab('tab-kpi3')" id="btn-tab-kpi3" class="tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-slate-300 hover:text-white transition-all flex items-center gap-2">
+                    <i data-lucide="circle-dollar-sign" class="w-4 h-4"></i> KPI 3: Obsolescencia $ Inventario NC
+                </button>
+            </div>
+            
+            <button onclick="toggleEditModal()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold shadow transition-all flex items-center gap-1.5">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Actualizar / Editar Datos Mensuales
+            </button>
+        </div>
+    </nav>
+
+    <!-- MODAL DE EDICIÓN DE DATOS EN TIEMPO REAL -->
+    <div id="editModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative my-8">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-4">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="file-spreadsheet" class="w-5 h-5 text-indigo-400"></i>
+                    <h3 class="text-lg font-bold text-white">Gestor de Datos Mensuales</h3>
+                </div>
+                <button onclick="toggleEditModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Selector de KPI a Editar -->
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Seleccionar KPI a Actualizar:</label>
+                    <select id="selectKpiToEdit" onchange="updateEditFormFields()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                        <option value="kpi1">KPI 1: Toneladas Fabricadas vs Retenidas (ADI, Roofing, Morteros)</option>
+                        <option value="kpi2">KPI 2: Reclamaciones Procedentes (2025 vs 2026)</option>
+                        <option value="kpi3">KPI 3: Obsolescencia $ Inventario NC</option>
+                    </select>
+                </div>
+
+                <form id="dataEditForm" onsubmit="handleDataUpdate(event)" class="space-y-4">
+                    <!-- Dinámico por JS -->
+                    <div id="dynamicFormFields" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Campos inyectados -->
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4 border-t border-slate-800">
+                        <button type="button" onclick="resetToDefaultData()" class="px-3 py-2 text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg transition-all">
+                            Restablecer Datos Originales
+                        </button>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="toggleEditModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold shadow-lg transition-all flex items-center gap-1.5">
+                                <i data-lucide="save" class="w-4 h-4"></i> Guardar y Actualizar Dashboard
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- METRICAS DE RESUMEN EJECUTIVO (CARDS SUPERIORES) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <!-- KPI 1 Card -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 relative overflow-hidden shadow-sm hover:border-indigo-500/50 transition-all">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">KPI 1: Ton Retenidas</p>
+                            <span class="px-1.5 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">Meta: ≤ 2.00%</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white" id="cardKpi1Fab">9,288.4 <span class="text-xs font-normal text-slate-400">Ton Fab</span></h3>
+                    </div>
+                    <span id="cardKpi1StatusBadge" class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20">
+                        <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                    </span>
+                </div>
+                <div class="mt-4 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/80 pt-2">
+                    <span>Retenidas: <b class="text-amber-400" id="cardKpi1Ret">49.77 T</b></span>
+                    <span>Actual: <b class="text-indigo-400" id="cardKpi1Pct">0.54%</b></span>
+                </div>
+            </div>
+
+            <!-- KPI 2 Card 2025 vs 2026 -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 relative overflow-hidden shadow-sm hover:border-indigo-500/50 transition-all">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">KPI 2: Reclamaciones</p>
+                            <span class="px-1.5 py-0.5 text-[10px] font-bold bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30">Meta: ≤ 25 Casos</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-emerald-400" id="cardKpi2Total2026">28 <span class="text-xs font-normal text-slate-400">Casos</span></h3>
+                    </div>
+                    <span id="cardKpi2StatusBadge" class="p-2 bg-rose-500/10 text-rose-400 rounded-lg border border-rose-500/20">
+                        <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                    </span>
+                </div>
+                <div class="mt-4 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/80 pt-2">
+                    <span>Año 2025: <b id="cardKpi2Total2025">38 Casos</b></span>
+                    <span class="text-emerald-400 font-semibold" id="cardKpi2Var">-26.3% vs 2025</span>
+                </div>
+            </div>
+
+            <!-- KPI 3 Card Obsolescencia Octubre -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 relative overflow-hidden shadow-sm hover:border-indigo-500/50 transition-all">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">KPI 3: Obsolescencia</p>
+                            <span class="px-1.5 py-0.5 text-[10px] font-bold bg-sky-500/20 text-sky-300 rounded border border-sky-500/30">Meta: ≤ 15.00%</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-sky-400" id="cardKpi3LastPct">20.84%</h3>
+                    </div>
+                    <span id="cardKpi3StatusBadge" class="p-2 bg-amber-500/10 text-amber-400 rounded-lg border border-amber-500/20">
+                        <i data-lucide="clock" class="w-5 h-5"></i>
+                    </span>
+                </div>
+                <div class="mt-4 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/80 pt-2">
+                    <span>Pico Máx: <b class="text-rose-400" id="cardKpi3MaxPct">27.19% (Sep)</b></span>
+                    <span class="text-amber-400 font-semibold" id="cardKpi3Trend">Desviado +5.84%</span>
+                </div>
+            </div>
+
+            <!-- KPI 3 Valor Moneda -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 relative overflow-hidden shadow-sm hover:border-indigo-500/50 transition-all">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Monto Inventario NC</p>
+                        <h3 class="text-xl font-bold text-rose-400 mt-1" id="cardKpi3NcAmount">$1,983 M</h3>
+                    </div>
+                    <span class="p-2 bg-rose-500/10 text-rose-400 rounded-lg border border-rose-500/20">
+                        <i data-lucide="dollar-sign" class="w-5 h-5"></i>
+                    </span>
+                </div>
+                <div class="mt-4 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/80 pt-2">
+                    <span>Inv. Total: <b id="cardKpi3TotalAmount">$9,517 M</b></span>
+                    <span>Impacto Financiero</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- SECCIÓN KPI 1: TONELADAS RETENIDAS Y FABRICADAS -->
+        <section id="section-kpi1" class="space-y-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 text-[10px] font-bold bg-indigo-500/20 text-indigo-300 rounded border border-indigo-500/30">KPI 1</span>
+                            <h2 class="text-base font-semibold text-white">% Toneladas Retenidas / Fabricadas por Línea</h2>
+                            <span class="px-2 py-0.5 text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full">🎯 Meta Fija: ≤ 2.00%</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-0.5">Comportamiento mensual con línea punteada amarilla indicando la Meta Tolerada Máxima (2.00%)</p>
+                    </div>
+                    <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
+                        <button onclick="switchLineKpi1('ADI')" id="btnADI" class="px-3 py-1 text-xs font-semibold rounded-md transition-all bg-indigo-600 text-white shadow">ADI</button>
+                        <button onclick="switchLineKpi1('Roofing')" id="btnRoofing" class="px-3 py-1 text-xs font-semibold rounded-md transition-all text-slate-400 hover:text-white">Roofing</button>
+                        <button onclick="switchLineKpi1('Morteros')" id="btnMorteros" class="px-3 py-1 text-xs font-semibold rounded-md transition-all text-slate-400 hover:text-white">Morteros</button>
+                    </div>
+                </div>
+                <div class="h-80 w-full pt-2">
+                    <canvas id="chartKpi1"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN KPI 2 Y KPI 3 EN PARALELO EN VISTA GENERAL -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- SECCIÓN KPI 2: RECLAMACIONES PROCEDENTES -->
+            <section id="section-kpi2" class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30">KPI 2</span>
+                            <h2 class="text-base font-semibold text-white">Reclamaciones Procedentes (2025 vs 2026)</h2>
+                        </div>
+                        <span class="px-2 py-0.5 text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full">🎯 Meta 2026: ≤ 25 Casos</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-2">Suma acumulada mensual con línea límite de Meta Anual Fija (≤ 25 Reclamos totales)</p>
+                    
+                    <div class="h-80 w-full pt-2">
+                        <canvas id="chartKpi2"></canvas>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+                    <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
+                        <span class="text-slate-400 block text-[10px]">ADI (2026)</span>
+                        <span class="font-bold text-indigo-400" id="kpi2LineAdi">3 reclamos</span>
+                    </div>
+                    <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
+                        <span class="text-slate-400 block text-[10px]">LAM (2026)</span>
+                        <span class="font-bold text-sky-400" id="kpi2LineLam">9 reclamos</span>
+                    </div>
+                    <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
+                        <span class="text-slate-400 block text-[10px]">Morteros (2026)</span>
+                        <span class="font-bold text-amber-400" id="kpi2LineMorteros">2 reclamos</span>
+                    </div>
+                    <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
+                        <span class="text-slate-400 block text-[10px]">Maquila (2026)</span>
+                        <span class="font-bold text-emerald-400" id="kpi2LineMaquila">14 reclamos</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN KPI 3: OBSOLESCENCIA INVENTARIO NC -->
+            <section id="section-kpi3" class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 text-[10px] font-bold bg-sky-500/20 text-sky-300 rounded border border-sky-500/30">KPI 3</span>
+                            <h2 class="text-base font-semibold text-white">Obsolescencia: % Inventario NC / Total</h2>
+                        </div>
+                        <span class="px-2 py-0.5 text-[11px] font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/30 rounded-full">🎯 Meta Fija: ≤ 15.00%</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-2">Valores porcentuales en barras horizontales comparados contra la Meta de Obsolescencia Max (15%)</p>
+                    
+                    <div class="h-80 w-full pt-2">
+                        <canvas id="chartKpi3"></canvas>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-800 text-xs flex justify-between items-center text-slate-400">
+                    <span>Meta Fija del Indicador: <b>≤ 15.00%</b></span>
+                    <span class="text-slate-200" id="kpi3EvolText">Último registro (<b>Octubre</b>): <b>20.84%</b> NC</span>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- TABLA INTEGRAL DE DATOS DEL SISTEMA DE CALIDAD -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+            <div class="p-5 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-base font-semibold text-white">Matriz Detallada de Inventario NC & Obsolescencia (KPI 3)</h2>
+                    <p class="text-xs text-slate-400">Evaluación de cumplimiento financiero contra Meta del 15.00%</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-300">
+                    <thead class="bg-slate-950 text-xs text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                        <tr>
+                            <th class="px-5 py-3 font-medium">Periodo</th>
+                            <th class="px-5 py-3 font-medium text-right">Suma Total Inventario</th>
+                            <th class="px-5 py-3 font-medium text-right">Suma Total NC</th>
+                            <th class="px-5 py-3 font-medium text-right">% NC Total</th>
+                            <th class="px-5 py-3 font-medium text-center">Meta Fija</th>
+                            <th class="px-5 py-3 font-medium text-center">Cumplimiento Meta</th>
+                        </tr>
+                    </thead>
+                    <tbody id="kpi3TableBody" class="divide-y divide-slate-800/60 text-xs font-mono">
+                        <!-- Insertado con JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER DE DERECHOS -->
+    <footer class="border-t border-slate-800 bg-slate-950 py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            Dashboard de Control de Calidad | Sistema Operativo de Gestión de No Conformidades
+        </div>
+    </footer>
+
+    <!-- LOGICA JAVASCRIPT Y GRAFICOS -->
+    <script>
+        lucide.createIcons();
+        Chart.register(ChartDataLabels);
+
+        // -------------------------------------------------------------
+        // METAS FIJAS DE LOS INDICADORES
+        // -------------------------------------------------------------
+        const TARGET_KPI1 = 2.00;  // ≤ 2.00% Ton Retenidas
+        const TARGET_KPI2 = 25;    // ≤ 25 Reclamaciones Totales
+        const TARGET_KPI3 = 15.00; // ≤ 15.00% Inventario NC
+
+        const monthsKpi1 = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        
+        // Dataset KPI 1
+        let dataKpi1 = {
+            ADI: {
+                color: '#3b82f6',
+                fab: [298, 527.3, 491.2, 341, 472.8, 617.2, 496, 447, 485, 0, 0, 0],
+                ret: [5, 0, 5, 5, 5, 0, 0.58, 0.98, 11, 0, 0, 0]
+            },
+            Roofing: {
+                color: '#10b981',
+                fab: [123.9, 41.9, 42.5, 53.1, 55.5, 102, 89, 74, 42, 0, 0, 0],
+                ret: [0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0]
+            },
+            Morteros: {
+                color: '#94a3b8',
+                fab: [581, 571, 491, 423, 317.7, 389.98, 423, 566, 726, 0, 0, 0],
+                ret: [0, 0, 0, 0, 0, 1.6, 0.24, 6.9, 3.725, 0, 0, 0]
+            }
+        };
+
+        // Dataset KPI 2 (Reclamaciones Procedentes)
+        const monthsKpi2 = ['Mes 1', 'Mes 2', 'Mes 3', 'Mes 4', 'Mes 5', 'Mes 6', 'Mes 7', 'Mes 8', 'Mes 9', 'Mes 10'];
+        let dataKpi2_2025 = [2, 2, 2, 3, 4, 2, 4, 3, 8, 5];
+        let dataKpi2_2026 = [1, 8, 2, 3, 3, 4, 2, 2, 2, 0];
+
+        // Dataset KPI 3 (Obsolescencia)
+        let periodsKpi3 = [
+            { period: 'Ene-Feb', totalInv: 11889367890, ncInv: 1954700365.92 },
+            { period: 'Mar-Abr', totalInv: 12234747515, ncInv: 2247606691.43 },
+            { period: 'May-Jun', totalInv: 11505759552, ncInv: 1943038934.00 },
+            { period: 'Julio',   totalInv: 10195098492, ncInv: 2399157852.83 },
+            { period: 'Agosto',  totalInv: 9481485260,  ncInv: 2482524092.13 },
+            { period: 'Septiembre', totalInv: 7992832241, ncInv: 2172981167.80 },
+            { period: 'Octubre', totalInv: 9517909862,  ncInv: 1983733698.00 }
+        ];
+
+        // Copia para reset
+        const defaultKpi1 = JSON.parse(JSON.stringify(dataKpi1));
+        const defaultKpi2_2025 = [...dataKpi2_2025];
+        const defaultKpi2_2026 = [...dataKpi2_2026];
+        const defaultKpi3 = JSON.parse(JSON.stringify(periodsKpi3));
+
+        let currentLineKpi1 = 'ADI';
+        let chart1, chart2, chart3;
+
+        // Helper para calcular array % NC en KPI 1
+        function getNcArray(fabArr, retArr) {
+            return fabArr.map((fab, i) => {
+                if (!fab || fab === 0) return 0;
+                return parseFloat(((retArr[i] / fab) * 100).toFixed(2));
+            });
+        }
+
+        // -------------------------------------------------------------
+        // INICIALIZACIÓN Y CONFIGURACIÓN DE GRÁFICOS CON DATALABELS Y METAS
+        // -------------------------------------------------------------
+        function initDashboard() {
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.font.family = 'Inter';
+
+            // --- GRAFICO KPI 1 ---
+            const ctx1 = document.getElementById('chartKpi1').getContext('2d');
+            chart1 = new Chart(ctx1, {
+                type: 'bar',
+                data: getKpi1ChartData(currentLineKpi1),
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: { top: 25 } },
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+                        datalabels: {
+                            display: function(context) {
+                                if (context.dataset.label.includes('Meta')) return false;
+                                return context.dataset.data[context.dataIndex] > 0;
+                            },
+                            formatter: function(value, context) {
+                                if (context.dataset.type === 'line' && context.dataset.label.includes('% NC')) {
+                                    return value.toFixed(2) + '%';
+                                } else if (context.dataset.type === 'bar') {
+                                    return value >= 100 ? value.toFixed(0) : value.toFixed(1);
+                                }
+                                return '';
+                            },
+                            anchor: function(context) {
+                                return context.dataset.type === 'line' ? 'end' : 'end';
+                            },
+                            align: function(context) {
+                                return context.dataset.type === 'line' ? 'top' : 'end';
+                            },
+                            color: function(context) {
+                                if (context.dataset.type === 'line') {
+                                    return context.dataset.data[context.dataIndex] > TARGET_KPI1 ? '#f43f5e' : '#34d399';
+                                }
+                                return '#e2e8f0';
+                            },
+                            font: { weight: 'bold', size: 10 }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear', position: 'left',
+                            title: { display: true, text: 'Ton Fabricadas', color: '#94a3b8', font: { size: 11 } },
+                            grid: { color: '#1e293b' }
+                        },
+                        y1: {
+                            type: 'linear', position: 'right',
+                            title: { display: true, text: '% NC', color: '#f43f5e', font: { size: 11 } },
+                            grid: { drawOnChartArea: false },
+                            ticks: { callback: v => v + '%' },
+                            max: 3.0
+                        },
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                    }
+                }
+            });
+
+            // --- GRAFICO KPI 2 (RECLAMACIONES) ---
+            const ctx2 = document.getElementById('chartKpi2').getContext('2d');
+            chart2 = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: monthsKpi2,
+                    datasets: [
+                        {
+                            label: 'SUM de 2025',
+                            data: dataKpi2_2025,
+                            backgroundColor: '#64748b',
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'SUM de 2026',
+                            data: dataKpi2_2026,
+                            backgroundColor: '#38bdf8',
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: { top: 25 } },
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+                        datalabels: {
+                            display: function(context) {
+                                return context.dataset.data[context.dataIndex] > 0;
+                            },
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#ffffff',
+                            font: { weight: 'bold', size: 11 },
+                            formatter: Math.round
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '# Reclamos Reportados', font: { size: 11 } },
+                            grid: { color: '#1e293b' },
+                            ticks: { stepSize: 1 }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // --- GRAFICO KPI 3 (OBSOLESCENCIA) ---
+            const ctx3 = document.getElementById('chartKpi3').getContext('2d');
+            chart3 = new Chart(ctx3, {
+                type: 'bar',
+                data: getKpi3ChartData(),
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: { right: 55 } },
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'right',
+                            color: function(context) {
+                                if (context.dataset.label.includes('Meta')) return '#f59e0b';
+                                return context.dataset.data[context.dataIndex] > TARGET_KPI3 ? '#f43f5e' : '#10b981';
+                            },
+                            font: { weight: 'bold', size: 10 },
+                            formatter: function(value, context) {
+                                if (context.dataset.label.includes('Meta')) return '';
+                                return value.toFixed(2) + '%';
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            min: 0,
+                            max: 32,
+                            ticks: { callback: v => v + '%' },
+                            grid: { color: '#1e293b' }
+                        },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+
+            updateHeaderCards();
+            renderKpi3Table();
+            updateEditFormFields();
+        }
+
+        // Helper Data KPI 1
+        function getKpi1ChartData(lineKey) {
+            const line = dataKpi1[lineKey];
+            const ncValues = getNcArray(line.fab, line.ret);
+
+            return {
+                labels: monthsKpi1,
+                datasets: [
+                    {
+                        type: 'line',
+                        label: '% NC (Retenidas / Fabricadas)',
+                        data: ncValues,
+                        borderColor: '#f43f5e',
+                        backgroundColor: '#f43f5e',
+                        borderWidth: 2.5,
+                        pointRadius: 4,
+                        yAxisID: 'y1',
+                        tension: 0.1
+                    },
+                    {
+                        type: 'line',
+                        label: `Meta Fija (≤ ${TARGET_KPI1.toFixed(2)}%)`,
+                        data: Array(12).fill(TARGET_KPI1),
+                        borderColor: '#f59e0b',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        yAxisID: 'y1',
+                        datalabels: { display: false }
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Ton Fabricadas',
+                        data: line.fab,
+                        backgroundColor: line.color,
+                        borderRadius: 4,
+                        yAxisID: 'y'
+                    }
+                ]
+            };
+        }
+
+        // Helper Data KPI 3
+        function getKpi3ChartData() {
+            const percentages = periodsKpi3.map(p => parseFloat(((p.ncInv / p.totalInv) * 100).toFixed(2)));
+            return {
+                labels: periodsKpi3.map(p => p.period),
+                datasets: [
+                    {
+                        label: '% NC TOTAL',
+                        data: percentages,
+                        backgroundColor: percentages.map(val => val > TARGET_KPI3 ? '#f43f5e' : '#3b82f6'),
+                        borderRadius: 6
+                    },
+                    {
+                        type: 'bar',
+                        label: `Meta Fija (≤ ${TARGET_KPI3.toFixed(2)}%)`,
+                        data: Array(periodsKpi3.length).fill(TARGET_KPI3),
+                        backgroundColor: 'transparent',
+                        borderColor: '#f59e0b',
+                        borderWidth: 2,
+                        borderDash: [4, 4]
+                    }
+                ]
+            };
+        }
+
+        // Cambio de línea KPI 1
+        function switchLineKpi1(lineKey) {
+            currentLineKpi1 = lineKey;
+            ['ADI', 'Roofing', 'Morteros'].forEach(l => {
+                const btn = document.getElementById(`btn${l}`);
+                if (l === lineKey) {
+                    btn.className = "px-3 py-1 text-xs font-semibold rounded-md transition-all bg-indigo-600 text-white shadow";
+                } else {
+                    btn.className = "px-3 py-1 text-xs font-semibold rounded-md transition-all text-slate-400 hover:text-white";
+                }
+            });
+
+            chart1.data = getKpi1ChartData(lineKey);
+            chart1.update();
+        }
+
+        // Formateador Monetario
+        function formatCOP(amount) {
+            return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(amount);
+        }
+
+        // Actualizar Tarjetas Superiores
+        function updateHeaderCards() {
+            // KPI 1 Totales
+            let totalFab = 0, totalRet = 0;
+            Object.keys(dataKpi1).forEach(k => {
+                totalFab += dataKpi1[k].fab.reduce((a, b) => a + b, 0);
+                totalRet += dataKpi1[k].ret.reduce((a, b) => a + b, 0);
+            });
+            const pctKpi1 = totalFab > 0 ? ((totalRet / totalFab) * 100).toFixed(2) : 0;
+
+            document.getElementById('cardKpi1Fab').innerHTML = `${totalFab.toLocaleString('es-CO', {maximumFractionDigits:1})} <span class="text-xs font-normal text-slate-400">Ton Fab</span>`;
+            document.getElementById('cardKpi1Ret').innerText = `${totalRet.toFixed(2)} T`;
+            document.getElementById('cardKpi1Pct').innerText = `${pctKpi1}%`;
+
+            // Badge KPI 1
+            const cardKpi1Badge = document.getElementById('cardKpi1StatusBadge');
+            if (pctKpi1 <= TARGET_KPI1) {
+                cardKpi1Badge.className = "p-2 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20";
+                cardKpi1Badge.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i>`;
+            } else {
+                cardKpi1Badge.className = "p-2 bg-rose-500/10 text-rose-400 rounded-lg border border-rose-500/20";
+                cardKpi1Badge.innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5"></i>`;
+            }
+
+            // KPI 2 Totales
+            const sum2025 = dataKpi2_2025.reduce((a, b) => a + b, 0);
+            const sum2026 = dataKpi2_2026.reduce((a, b) => a + b, 0);
+            const varPct = sum2025 > 0 ? (((sum2026 - sum2025) / sum2025) * 100).toFixed(1) : 0;
+
+            document.getElementById('cardKpi2Total2026').innerHTML = `${sum2026} <span class="text-xs font-normal text-slate-400">Casos</span>`;
+            document.getElementById('cardKpi2Total2025').innerText = `${sum2025} Casos`;
+            document.getElementById('cardKpi2Var').innerText = `${varPct}% vs 2025`;
+
+            // Badge KPI 2
+            const cardKpi2Badge = document.getElementById('cardKpi2StatusBadge');
+            if (sum2026 <= TARGET_KPI2) {
+                cardKpi2Badge.className = "p-2 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20";
+                cardKpi2Badge.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i>`;
+            } else {
+                cardKpi2Badge.className = "p-2 bg-rose-500/10 text-rose-400 rounded-lg border border-rose-500/20";
+                cardKpi2Badge.innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5"></i>`;
+            }
+
+            // KPI 3 Totales
+            const lastPeriod = periodsKpi3[periodsKpi3.length - 1];
+            const lastPct = parseFloat(((lastPeriod.ncInv / lastPeriod.totalInv) * 100).toFixed(2));
+            
+            // Buscar Max
+            let maxPct = 0, maxMonth = '';
+            periodsKpi3.forEach(p => {
+                const pPct = (p.ncInv / p.totalInv) * 100;
+                if (pPct > maxPct) { maxPct = pPct; maxMonth = p.period; }
+            });
+
+            document.getElementById('cardKpi3LastPct').innerText = `${lastPct}%`;
+            document.getElementById('cardKpi3MaxPct').innerText = `${maxPct.toFixed(2)}% (${maxMonth})`;
+            document.getElementById('cardKpi3NcAmount').innerText = `$${(lastPeriod.ncInv / 1e6).toFixed(0)} M`;
+            document.getElementById('cardKpi3TotalAmount').innerText = `$${(lastPeriod.totalInv / 1e6).toFixed(0)} M`;
+            
+            const diffPct = (lastPct - TARGET_KPI3).toFixed(2);
+            if (lastPct <= TARGET_KPI3) {
+                document.getElementById('cardKpi3Trend').className = "text-emerald-400 font-semibold";
+                document.getElementById('cardKpi3Trend').innerText = `Cumple (${diffPct}%)`;
+            } else {
+                document.getElementById('cardKpi3Trend').className = "text-rose-400 font-semibold";
+                document.getElementById('cardKpi3Trend').innerText = `Exceso +${diffPct}%`;
+            }
+
+            document.getElementById('kpi3EvolText').innerHTML = `Último registro (<b>${lastPeriod.period}</b>): <b>${lastPct}%</b> NC`;
+            lucide.createIcons();
+        }
+
+        // Render Tabla KPI 3
+        function renderKpi3Table() {
+            const tbody = document.getElementById('kpi3TableBody');
+            tbody.innerHTML = '';
+
+            periodsKpi3.forEach((item) => {
+                const pct = (item.ncInv / item.totalInv) * 100;
+                let badgeClass = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+                let textStatus = "Cumple Meta";
+
+                if (pct > TARGET_KPI3) {
+                    badgeClass = "bg-rose-500/10 text-rose-400 border-rose-500/20";
+                    textStatus = "Desviado";
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-800/40 transition-colors">
+                        <td class="px-5 py-3 font-semibold text-slate-200">${item.period}</td>
+                        <td class="px-5 py-3 text-right text-slate-300">${formatCOP(item.totalInv)}</td>
+                        <td class="px-5 py-3 text-right text-rose-300 font-medium">${formatCOP(item.ncInv)}</td>
+                        <td class="px-5 py-3 text-right font-bold ${pct > TARGET_KPI3 ? 'text-rose-400' : 'text-emerald-400'}">${pct.toFixed(2)}%</td>
+                        <td class="px-5 py-3 text-center text-amber-400 font-semibold">≤ ${TARGET_KPI3.toFixed(2)}%</td>
+                        <td class="px-5 py-3 text-center">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${badgeClass}">
+                                ${textStatus}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // -------------------------------------------------------------
+        // MANEJO DEL MODAL DE EDICIÓN DINÁMICA
+        // -------------------------------------------------------------
+        function toggleEditModal() {
+            const modal = document.getElementById('editModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function updateEditFormFields() {
+            const kpiSelect = document.getElementById('selectKpiToEdit').value;
+            const container = document.getElementById('dynamicFormFields');
+            container.innerHTML = '';
+
+            if (kpiSelect === 'kpi1') {
+                container.innerHTML = `
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Línea de Producción:</label>
+                        <select id="editKpi1Line" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                            <option value="ADI">ADI</option>
+                            <option value="Roofing">Roofing</option>
+                            <option value="Morteros">Morteros</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Mes:</label>
+                        <select id="editKpi1Month" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                            ${monthsKpi1.map((m, idx) => `<option value="${idx}">${m}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Toneladas Fabricadas:</label>
+                        <input type="number" step="0.1" id="editKpi1Fab" placeholder="Ej: 520.5" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" required>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Toneladas Retenidas (NC):</label>
+                        <input type="number" step="0.01" id="editKpi1Ret" placeholder="Ej: 5.2" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" required>
+                    </div>
+                `;
+            } else if (kpiSelect === 'kpi2') {
+                container.innerHTML = `
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Mes:</label>
+                        <select id="editKpi2Month" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                            ${monthsKpi2.map((m, idx) => `<option value="${idx}">${m}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Reclamos Año 2025:</label>
+                        <input type="number" id="editKpi2Val2025" placeholder="Ej: 3" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Reclamos Año 2026:</label>
+                        <input type="number" id="editKpi2Val2026" placeholder="Ej: 2" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" required>
+                    </div>
+                `;
+            } else if (kpiSelect === 'kpi3') {
+                container.innerHTML = `
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Periodo:</label>
+                        <select id="editKpi3Period" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                            ${periodsKpi3.map((p, idx) => `<option value="${idx}">${p.period}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Suma Total Inventario ($ COP):</label>
+                        <input type="number" id="editKpi3TotalInv" placeholder="Ej: 9500000000" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Suma Inventario NC ($ COP):</label>
+                        <input type="number" id="editKpi3NcInv" placeholder="Ej: 1900000000" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" required>
+                    </div>
+                `;
+            }
+        }
+
+        // Manejar Guardado de Datos
+        function handleDataUpdate(e) {
+            e.preventDefault();
+            const kpiSelect = document.getElementById('selectKpiToEdit').value;
+
+            if (kpiSelect === 'kpi1') {
+                const line = document.getElementById('editKpi1Line').value;
+                const mIdx = parseInt(document.getElementById('editKpi1Month').value);
+                const fabVal = parseFloat(document.getElementById('editKpi1Fab').value);
+                const retVal = parseFloat(document.getElementById('editKpi1Ret').value);
+
+                dataKpi1[line].fab[mIdx] = fabVal;
+                dataKpi1[line].ret[mIdx] = retVal;
+
+                chart1.data = getKpi1ChartData(currentLineKpi1);
+                chart1.update();
+
+            } else if (kpiSelect === 'kpi2') {
+                const mIdx = parseInt(document.getElementById('editKpi2Month').value);
+                const v2025 = parseInt(document.getElementById('editKpi2Val2025').value);
+                const v2026 = parseInt(document.getElementById('editKpi2Val2026').value);
+
+                dataKpi2_2025[mIdx] = v2025;
+                dataKpi2_2026[mIdx] = v2026;
+
+                chart2.data.datasets[0].data = dataKpi2_2025;
+                chart2.data.datasets[1].data = dataKpi2_2026;
+                chart2.update();
+
+            } else if (kpiSelect === 'kpi3') {
+                const pIdx = parseInt(document.getElementById('editKpi3Period').value);
+                const totalVal = parseFloat(document.getElementById('editKpi3TotalInv').value);
+                const ncVal = parseFloat(document.getElementById('editKpi3NcInv').value);
+
+                periodsKpi3[pIdx].totalInv = totalVal;
+                periodsKpi3[pIdx].ncInv = ncVal;
+
+                chart3.data = getKpi3ChartData();
+                chart3.update();
+                renderKpi3Table();
+            }
+
+            updateHeaderCards();
+            toggleEditModal();
+        }
+
+        // Restablecer Datos
+        function resetToDefaultData() {
+            dataKpi1 = JSON.parse(JSON.stringify(defaultKpi1));
+            dataKpi2_2025 = [...defaultKpi2_2025];
+            dataKpi2_2026 = [...defaultKpi2_2026];
+            periodsKpi3 = JSON.parse(JSON.stringify(defaultKpi3));
+
+            chart1.data = getKpi1ChartData(currentLineKpi1);
+            chart1.update();
+
+            chart2.data.datasets[0].data = dataKpi2_2025;
+            chart2.data.datasets[1].data = dataKpi2_2026;
+            chart2.update();
+
+            chart3.data = getKpi3ChartData();
+            chart3.update();
+
+            renderKpi3Table();
+            updateHeaderCards();
+            toggleEditModal();
+        }
+
+        // Cambio de Pestañas
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${tabId}`).classList.add('active');
+
+            const s1 = document.getElementById('section-kpi1');
+            const s2 = document.getElementById('section-kpi2');
+            const s3 = document.getElementById('section-kpi3');
+
+            if (tabId === 'tab-all') {
+                s1.style.display = 'block';
+                s2.style.display = 'block';
+                s3.style.display = 'block';
+            } else if (tabId === 'tab-kpi1') {
+                s1.style.display = 'block';
+                s2.style.display = 'none';
+                s3.style.display = 'none';
+            } else if (tabId === 'tab-kpi2') {
+                s1.style.display = 'none';
+                s2.style.display = 'block';
+                s3.style.display = 'none';
+            } else if (tabId === 'tab-kpi3') {
+                s1.style.display = 'none';
+                s2.style.display = 'none';
+                s3.style.display = 'block';
+            }
+        }
+
+        window.onload = function() {
+            initDashboard();
+        };
+    </script>
+</body>
+</html>

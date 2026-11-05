@@ -249,19 +249,19 @@
                 <div class="mt-4 pt-3 border-t border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
                     <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
                         <span class="text-slate-400 block text-[10px]">ADI (2026)</span>
-                        <span class="font-bold text-indigo-400" id="kpi2LineAdi">3 reclamos</span>
+                        <span class="font-bold text-indigo-400 cursor-pointer hover:bg-slate-800/80 rounded px-1" id="kpi2LineAdi" contenteditable="true" onblur="saveTextsToStorage()">3 reclamos</span>
                     </div>
                     <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
                         <span class="text-slate-400 block text-[10px]">LAM (2026)</span>
-                        <span class="font-bold text-sky-400" id="kpi2LineLam">9 reclamos</span>
+                        <span class="font-bold text-sky-400 cursor-pointer hover:bg-slate-800/80 rounded px-1" id="kpi2LineLam" contenteditable="true" onblur="saveTextsToStorage()">9 reclamos</span>
                     </div>
                     <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
                         <span class="text-slate-400 block text-[10px]">Morteros (2026)</span>
-                        <span class="font-bold text-amber-400" id="kpi2LineMorteros">2 reclamos</span>
+                        <span class="font-bold text-amber-400 cursor-pointer hover:bg-slate-800/80 rounded px-1" id="kpi2LineMorteros" contenteditable="true" onblur="saveTextsToStorage()">2 reclamos</span>
                     </div>
                     <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
                         <span class="text-slate-400 block text-[10px]">Maquila (2026)</span>
-                        <span class="font-bold text-emerald-400" id="kpi2LineMaquila">14 reclamos</span>
+                        <span class="font-bold text-emerald-400 cursor-pointer hover:bg-slate-800/80 rounded px-1" id="kpi2LineMaquila" contenteditable="true" onblur="saveTextsToStorage()">14 reclamos</span>
                     </div>
                 </div>
             </section>
@@ -398,6 +398,7 @@
         // INICIALIZACIÓN Y CONFIGURACIÓN DE GRÁFICOS CON DATALABELS Y METAS
         // -------------------------------------------------------------
         function initDashboard() {
+            loadFromLocalStorage();
             Chart.defaults.color = '#94a3b8';
             Chart.defaults.font.family = 'Inter';
 
@@ -783,9 +784,14 @@
                     </div>
                 `;
             } else if (kpiSelect === 'kpi2') {
+                const adiVal = document.getElementById('kpi2LineAdi').innerText;
+                const lamVal = document.getElementById('kpi2LineLam').innerText;
+                const morterosVal = document.getElementById('kpi2LineMorteros').innerText;
+                const maquilaVal = document.getElementById('kpi2LineMaquila').innerText;
+
                 container.innerHTML = `
                     <div class="sm:col-span-2">
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Mes:</label>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Mes a Actualizar en Gráfico:</label>
                         <select id="editKpi2Month" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
                             ${monthsKpi2.map((m, idx) => `<option value="${idx}">${m}</option>`).join('')}
                         </select>
@@ -797,6 +803,25 @@
                     <div>
                         <label class="block text-xs font-medium text-slate-400 mb-1">Reclamos Año 2026:</label>
                         <input type="number" id="editKpi2Val2026" placeholder="Ej: 2" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" required>
+                    </div>
+                    <div class="sm:col-span-2 border-t border-slate-800 pt-3 mt-2">
+                        <p class="text-xs font-semibold text-indigo-400 mb-2">Editar Textos de Resumen por Línea (Tarjetas inferiores):</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Texto ADI (2026):</label>
+                        <input type="text" id="editKpi2TextAdi" value="${adiVal}" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Texto LAM (2026):</label>
+                        <input type="text" id="editKpi2TextLam" value="${lamVal}" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Texto Morteros (2026):</label>
+                        <input type="text" id="editKpi2TextMorteros" value="${morterosVal}" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Texto Maquila (2026):</label>
+                        <input type="text" id="editKpi2TextMaquila" value="${maquilaVal}" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
                     </div>
                 `;
             } else if (kpiSelect === 'kpi3') {
@@ -848,6 +873,19 @@
                 chart2.data.datasets[1].data = dataKpi2_2026;
                 chart2.update();
 
+                // Actualizar textos de resumen por línea
+                const txtAdi = document.getElementById('editKpi2TextAdi').value;
+                const txtLam = document.getElementById('editKpi2TextLam').value;
+                const txtMorteros = document.getElementById('editKpi2TextMorteros').value;
+                const txtMaquila = document.getElementById('editKpi2TextMaquila').value;
+
+                if (txtAdi) document.getElementById('kpi2LineAdi').innerText = txtAdi;
+                if (txtLam) document.getElementById('kpi2LineLam').innerText = txtLam;
+                if (txtMorteros) document.getElementById('kpi2LineMorteros').innerText = txtMorteros;
+                if (txtMaquila) document.getElementById('kpi2LineMaquila').innerText = txtMaquila;
+
+                saveTextsToStorage();
+
             } else if (kpiSelect === 'kpi3') {
                 const pIdx = parseInt(document.getElementById('editKpi3Period').value);
                 const totalVal = parseFloat(document.getElementById('editKpi3TotalInv').value);
@@ -861,12 +899,14 @@
                 renderKpi3Table();
             }
 
+            saveToLocalStorage();
             updateHeaderCards();
             toggleEditModal();
         }
 
         // Restablecer Datos
         function resetToDefaultData() {
+            localStorage.clear();
             dataKpi1 = JSON.parse(JSON.stringify(defaultKpi1));
             dataKpi2_2025 = [...defaultKpi2_2025];
             dataKpi2_2026 = [...defaultKpi2_2026];
@@ -883,6 +923,7 @@
             chart3.update();
 
             renderKpi3Table();
+            saveToLocalStorage();
             updateHeaderCards();
             toggleEditModal();
         }
@@ -913,6 +954,54 @@
                 s2.style.display = 'none';
                 s3.style.display = 'block';
             }
+        }
+
+        
+        // -------------------------------------------------------------
+        // PERSISTENCIA DE DATOS CON LOCALSTORAGE (OPCIÓN 2)
+        // -------------------------------------------------------------
+        
+        // guardar y cargar textos personalizados de KPI 2 (Tarjetas de líneas)
+        function saveTextsToStorage() {
+            const textsKpi2 = {
+                adi: document.getElementById('kpi2LineAdi').innerText,
+                lam: document.getElementById('kpi2LineLam').innerText,
+                morteros: document.getElementById('kpi2LineMorteros').innerText,
+                maquila: document.getElementById('kpi2LineMaquila').innerText
+            };
+            localStorage.setItem('dashboard_texts_kpi2', JSON.stringify(textsKpi2));
+        }
+
+        function loadTextsFromStorage() {
+            const savedTexts = localStorage.getItem('dashboard_texts_kpi2');
+            if (savedTexts) {
+                const t = JSON.parse(savedTexts);
+                if (t.adi) document.getElementById('kpi2LineAdi').innerText = t.adi;
+                if (t.lam) document.getElementById('kpi2LineLam').innerText = t.lam;
+                if (t.morteros) document.getElementById('kpi2LineMorteros').innerText = t.morteros;
+                if (t.maquila) document.getElementById('kpi2LineMaquila').innerText = t.maquila;
+            }
+        }
+
+        function saveToLocalStorage() {
+            saveTextsToStorage();
+            localStorage.setItem('dashboard_kpi1', JSON.stringify(dataKpi1));
+            localStorage.setItem('dashboard_kpi2_2025', JSON.stringify(dataKpi2_2025));
+            localStorage.setItem('dashboard_kpi2_2026', JSON.stringify(dataKpi2_2026));
+            localStorage.setItem('dashboard_kpi3', JSON.stringify(periodsKpi3));
+        }
+
+        function loadFromLocalStorage() {
+            loadTextsFromStorage();
+            const savedKpi1 = localStorage.getItem('dashboard_kpi1');
+            const savedKpi2_2025 = localStorage.getItem('dashboard_kpi2_2025');
+            const savedKpi2_2026 = localStorage.getItem('dashboard_kpi2_2026');
+            const savedKpi3 = localStorage.getItem('dashboard_kpi3');
+
+            if (savedKpi1) dataKpi1 = JSON.parse(savedKpi1);
+            if (savedKpi2_2025) dataKpi2_2025 = JSON.parse(savedKpi2_2025);
+            if (savedKpi2_2026) dataKpi2_2026 = JSON.parse(savedKpi2_2026);
+            if (savedKpi3) periodsKpi3 = JSON.parse(savedKpi3);
         }
 
         window.onload = function() {

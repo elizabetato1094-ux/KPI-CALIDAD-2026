@@ -236,7 +236,7 @@
                         </div>
                         <span class="px-2 py-0.5 text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full">🎯 Meta 2026: ≤ 25 Casos</span>
                     </div>
-                    <p class="text-xs text-slate-400 mb-2">Suma acumulada mensual con línea límite de Meta Anual Fija (≤ 25 Reclamos totales)</p>
+                    <p class="text-xs text-slate-400 mb-2">Comparativo mensual (Mes 1 a Mes 12) con desglose automático por línea</p>
                     
                     <div class="h-80 w-full pt-2">
                         <canvas id="chartKpi2"></canvas>
@@ -246,19 +246,19 @@
                 <div class="mt-4 pt-3 border-t border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
                     <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
                         <span class="text-slate-400 block text-[10px]">ADI (2026)</span>
-                        <span class="font-bold text-indigo-400 cursor-pointer hover:bg-slate-800/80 rounded px-1" id="kpi2LineAdi" contenteditable="true" onblur="saveTextsToStorage()">3 reclamos</span>
+                        <span class="font-bold text-indigo-400" id="kpi2LineAdi">3 reclamos</span>
                     </div>
                     <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
                         <span class="text-slate-400 block text-[10px]">LAM (2026)</span>
-                        <span class="font-bold text-sky-400 cursor-pointer hover:bg-slate-800/80 rounded px-1" id="kpi2LineLam" contenteditable="true" onblur="saveTextsToStorage()">9 reclamos</span>
+                        <span class="font-bold text-sky-400" id="kpi2LineLam">9 reclamos</span>
                     </div>
                     <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
                         <span class="text-slate-400 block text-[10px]">Morteros (2026)</span>
-                        <span class="font-bold text-amber-400 cursor-pointer hover:bg-slate-800/80 rounded px-1" id="kpi2LineMorteros" contenteditable="true" onblur="saveTextsToStorage()">2 reclamos</span>
+                        <span class="font-bold text-amber-400" id="kpi2LineMorteros">2 reclamos</span>
                     </div>
                     <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
                         <span class="text-slate-400 block text-[10px]">Maquila (2026)</span>
-                        <span class="font-bold text-emerald-400 cursor-pointer hover:bg-slate-800/80 rounded px-1" id="kpi2LineMaquila" contenteditable="true" onblur="saveTextsToStorage()">14 reclamos</span>
+                        <span class="font-bold text-emerald-400" id="kpi2LineMaquila">14 reclamos</span>
                     </div>
                 </div>
             </section>
@@ -354,31 +354,54 @@
             }
         };
 
-        // Dataset KPI 2
-        const monthsKpi2 = ['Mes 1', 'Mes 2', 'Mes 3', 'Mes 4', 'Mes 5', 'Mes 6', 'Mes 7', 'Mes 8', 'Mes 9', 'Mes 10'];
-        let dataKpi2_2025 = [2, 2, 2, 3, 4, 2, 4, 3, 8, 5];
-        let dataKpi2_2026 = [1, 8, 2, 3, 3, 4, 2, 2, 2, 0];
+        // Dataset KPI 2 (Extendido hasta Mes 12 - Diciembre y desglosado por línea/maquila)
+        const monthsKpi2 = [
+            'Mes 1 (Ene)', 'Mes 2 (Feb)', 'Mes 3 (Mar)', 'Mes 4 (Abr)',
+            'Mes 5 (May)', 'Mes 6 (Jun)', 'Mes 7 (Jul)', 'Mes 8 (Ago)',
+            'Mes 9 (Sep)', 'Mes 10 (Oct)', 'Mes 11 (Nov)', 'Mes 12 (Dic)'
+        ];
+        let dataKpi2_2025 = [2, 2, 2, 3, 4, 2, 4, 3, 8, 5, 2, 1]; // Total 2025: 38 casos
+        
+        // Desglose mensual 2026 por línea (Suma inicial: ADI=3, LAM=9, Morteros=2, Maquila=14 -> Total=28 casos)
+        let dataKpi2_2026_lines = [
+            { adi: 0, lam: 0, morteros: 0, maquila: 1 }, // Mes 1 (1)
+            { adi: 1, lam: 3, morteros: 1, maquila: 3 }, // Mes 2 (8)
+            { adi: 0, lam: 1, morteros: 0, maquila: 1 }, // Mes 3 (2)
+            { adi: 1, lam: 1, morteros: 0, maquila: 1 }, // Mes 4 (3)
+            { adi: 0, lam: 1, morteros: 1, maquila: 1 }, // Mes 5 (3)
+            { adi: 1, lam: 1, morteros: 0, maquila: 2 }, // Mes 6 (4)
+            { adi: 0, lam: 1, morteros: 0, maquila: 1 }, // Mes 7 (2)
+            { adi: 0, lam: 1, morteros: 0, maquila: 1 }, // Mes 8 (2)
+            { adi: 0, lam: 0, morteros: 0, maquila: 2 }, // Mes 9 (2)
+            { adi: 0, lam: 0, morteros: 0, maquila: 1 }, // Mes 10 (1)
+            { adi: 0, lam: 0, morteros: 0, maquila: 0 }, // Mes 11 (Nov)
+            { adi: 0, lam: 0, morteros: 0, maquila: 0 }  // Mes 12 (Dic)
+        ];
 
-        // Dataset KPI 3 (Incluye Noviembre real y Diciembre habilitado)
+        // Dataset KPI 3
         let periodsKpi3 = [
-            { period: 'Ene-Feb',    totalInv: 11889367890,   ncInv: 1954700365.92 },
-            { period: 'Mar-Abr',    totalInv: 12234747515,   ncInv: 2247606691.43 },
-            { period: 'May-Jun',    totalInv: 11505759552,   ncInv: 1943038934.00 },
-            { period: 'Julio',      totalInv: 10195098492,   ncInv: 2399157852.83 },
-            { period: 'Agosto',     totalInv: 9481485260,    ncInv: 2482524092.13 },
-            { period: 'Septiembre', totalInv: 7992832241,    ncInv: 2172981167.80 },
-            { period: 'Octubre',    totalInv: 9517909862,    ncInv: 1983733698.00 },
-            { period: 'Noviembre',  totalInv: 9619841810.85, ncInv: 1525074513.54 },
-            { period: 'Diciembre',  totalInv: 1,             ncInv: 0 }
+            { period: 'Ene-Feb',    totalInv: 11889367890,    ncInv: 1954700365.92 },
+            { period: 'Mar-Abr',    totalInv: 12234747515,    ncInv: 2247606691.43 },
+            { period: 'May-Jun',    totalInv: 11505759552,    ncInv: 1943038934.00 },
+            { period: 'Julio',      totalInv: 10195098492,    ncInv: 2399157852.83 },
+            { period: 'Agosto',     totalInv: 9481485260,     ncInv: 2482524092.13 },
+            { period: 'Septiembre', totalInv: 7992832241,     ncInv: 2172981167.80 },
+            { period: 'Octubre',    totalInv: 9517909862,     ncInv: 1983733698.00 },
+            { period: 'Noviembre',  totalInv: 9619841810.85,  ncInv: 1525074513.54 },
+            { period: 'Diciembre',  totalInv: 1,              ncInv: 0 }
         ];
 
         const defaultKpi1 = JSON.parse(JSON.stringify(dataKpi1));
         const defaultKpi2_2025 = [...dataKpi2_2025];
-        const defaultKpi2_2026 = [...dataKpi2_2026];
+        const defaultKpi2_2026_lines = JSON.parse(JSON.stringify(dataKpi2_2026_lines));
         const defaultKpi3 = JSON.parse(JSON.stringify(periodsKpi3));
 
         let currentLineKpi1 = 'ADI';
         let chart1, chart2, chart3;
+
+        function getKpi2MonthlyTotals() {
+            return dataKpi2_2026_lines.map(m => m.adi + m.lam + m.morteros + m.maquila);
+        }
 
         function getNcArray(fabArr, retArr) {
             return fabArr.map((fab, i) => {
@@ -533,7 +556,7 @@
                         },
                         {
                             label: 'SUM de 2026',
-                            data: dataKpi2_2026,
+                            data: getKpi2MonthlyTotals(),
                             backgroundColor: '#38bdf8',
                             borderRadius: 4
                         }
@@ -550,20 +573,18 @@
                                 return context.dataset.data[context.dataIndex] > 0;
                             },
                             anchor: 'end',
-                            align: 'top',
-                            color: '#ffffff',
-                            font: { weight: 'bold', size: 11 },
-                            formatter: Math.round
+                            align: 'end',
+                            color: '#f8fafc',
+                            font: { weight: 'bold', size: 10 }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            title: { display: true, text: '# Reclamos Reportados', font: { size: 11 } },
                             grid: { color: '#1e293b' },
-                            ticks: { stepSize: 1 }
+                            title: { display: true, text: '# Reclamos Reportados', color: '#94a3b8', font: { size: 11 } }
                         },
-                        x: { grid: { display: false } }
+                        x: { grid: { display: false }, ticks: { font: { size: 9 } } }
                     }
                 }
             });
@@ -577,21 +598,18 @@
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
-                    layout: { padding: { right: 55 } },
+                    layout: { padding: { right: 45 } },
                     plugins: {
                         legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
                         datalabels: {
-                            anchor: 'end',
-                            align: 'right',
-                            color: function(context) {
-                                if (context.dataset.label.includes('Meta')) return '#f59e0b';
-                                return context.dataset.data[context.dataIndex] > TARGET_KPI3 ? '#f43f5e' : '#10b981';
+                            display: function(context) {
+                                return context.dataset.type !== 'line' && context.dataset.data[context.dataIndex] > 0;
                             },
-                            font: { weight: 'bold', size: 10 },
-                            formatter: function(value, context) {
-                                if (context.dataset.label.includes('Meta')) return '';
-                                return value > 0 ? value.toFixed(2) + '%' : 'Sin dato';
-                            }
+                            formatter: v => v.toFixed(2) + '%',
+                            anchor: 'end',
+                            align: 'end',
+                            color: '#f8fafc',
+                            font: { weight: 'bold', size: 10 }
                         }
                     },
                     scales: {
@@ -601,86 +619,23 @@
                             grid: { color: '#1e293b' },
                             ticks: { callback: v => v + '%' }
                         },
-                        y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+                        y: { grid: { display: false }, ticks: { font: { size: 10 } } }
                     }
                 }
             });
 
-            renderAllSummaries();
-        }
-
-        function renderAllSummaries() {
-            // 1. Resumen KPI 1
-            let totalFab = 0, totalRet = 0;
-            Object.values(dataKpi1).forEach(line => {
-                totalFab += line.fab.reduce((a, b) => a + b, 0);
-                totalRet += line.ret.reduce((a, b) => a + b, 0);
-            });
-            const pct1 = totalFab > 0 ? ((totalRet / totalFab) * 100).toFixed(2) : '0.00';
-            document.getElementById('cardKpi1Fab').innerHTML = `${totalFab.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} <span class="text-xs font-normal text-slate-400">Ton Fab</span>`;
-            document.getElementById('cardKpi1Ret').textContent = `${totalRet.toFixed(2)} T`;
-            document.getElementById('cardKpi1Pct').textContent = `${pct1}%`;
-
-            // 2. Resumen KPI 2
-            const sum2025 = dataKpi2_2025.reduce((a, b) => a + b, 0);
-            const sum2026 = dataKpi2_2026.reduce((a, b) => a + b, 0);
-            const varPct = sum2025 > 0 ? (((sum2026 - sum2025) / sum2025) * 100).toFixed(1) : 0;
-            document.getElementById('cardKpi2Total2026').innerHTML = `${sum2026} <span class="text-xs font-normal text-slate-400">Casos</span>`;
-            document.getElementById('cardKpi2Total2025').textContent = `${sum2025} Casos`;
-            document.getElementById('cardKpi2Var').textContent = `${varPct > 0 ? '+' : ''}${varPct}% vs 2025`;
-
-            // 3. Resumen KPI 3 y Tabla
-            const validPeriods = periodsKpi3.filter(p => p.totalInv > 1 && p.ncInv > 0);
-            const lastValid = validPeriods.length > 0 ? validPeriods[validPeriods.length - 1] : periodsKpi3[0];
-            const lastPct = ((lastValid.ncInv / lastValid.totalInv) * 100).toFixed(2);
-            const diffMeta = (lastPct - TARGET_KPI3).toFixed(2);
-
-            let maxPct = 0, maxPeriod = '';
-            validPeriods.forEach(p => {
-                const pct = (p.ncInv / p.totalInv) * 100;
-                if (pct > maxPct) { maxPct = pct; maxPeriod = p.period.slice(0, 3); }
-            });
-
-            document.getElementById('cardKpi3LastPct').textContent = `${lastPct}%`;
-            document.getElementById('cardKpi3MaxPct').textContent = `${maxPct.toFixed(2)}% (${maxPeriod})`;
-            document.getElementById('cardKpi3Trend').textContent = diffMeta > 0 ? `Desviado +${diffMeta}%` : `Cumple (${diffMeta}%)`;
-            document.getElementById('cardKpi3NcAmount').textContent = `$${Math.round(lastValid.ncInv / 1000000).toLocaleString('en-US')} M`;
-            document.getElementById('cardKpi3TotalAmount').textContent = `$${Math.round(lastValid.totalInv / 1000000).toLocaleString('en-US')} M`;
-            document.getElementById('kpi3EvolText').innerHTML = `Último registro (<b>${lastValid.period}</b>): <b>${lastPct}%</b> NC`;
-
-            // Renderizar Tabla KPI 3
-            const tbody = document.getElementById('kpi3TableBody');
-            tbody.innerHTML = '';
-            periodsKpi3.forEach(p => {
-                const hasData = p.totalInv > 1 && p.ncInv > 0;
-                const pct = hasData ? ((p.ncInv / p.totalInv) * 100).toFixed(2) : '0.00';
-                const cumple = hasData && parseFloat(pct) <= TARGET_KPI3;
-                const badge = !hasData
-                    ? `<span class="px-2 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-400">Pendiente</span>`
-                    : cumple
-                        ? `<span class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">✔ Cumple</span>`
-                        : `<span class="px-2 py-0.5 rounded-full text-[10px] bg-rose-500/10 text-rose-400 border border-rose-500/20">✖ Desviado (+${(pct - TARGET_KPI3).toFixed(2)}%)</span>`;
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-800/40 transition-colors">
-                        <td class="px-5 py-3 font-sans font-semibold text-white">${p.period}</td>
-                        <td class="px-5 py-3 text-right">${hasData ? '$' + p.totalInv.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}</td>
-                        <td class="px-5 py-3 text-right text-rose-300">${hasData ? '$' + p.ncInv.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}</td>
-                        <td class="px-5 py-3 text-right font-bold ${hasData ? (cumple ? 'text-emerald-400' : 'text-rose-400') : 'text-slate-500'}">${hasData ? pct + '%' : '-'}</td>
-                        <td class="px-5 py-3 text-center text-slate-400">≤ 15.00%</td>
-                        <td class="px-5 py-3 text-center font-sans">${badge}</td>
-                    </tr>
-                `;
-            });
+            refreshAllSummaries();
         }
 
         function switchLineKpi1(line) {
             currentLineKpi1 = line;
             ['ADI', 'Roofing', 'Morteros'].forEach(l => {
                 const btn = document.getElementById('btn' + l);
-                btn.className = l === line
-                    ? 'px-3 py-1 text-xs font-semibold rounded-md transition-all bg-indigo-600 text-white shadow'
-                    : 'px-3 py-1 text-xs font-semibold rounded-md transition-all text-slate-400 hover:text-white';
+                if (l === line) {
+                    btn.className = 'px-3 py-1 text-xs font-semibold rounded-md transition-all bg-indigo-600 text-white shadow';
+                } else {
+                    btn.className = 'px-3 py-1 text-xs font-semibold rounded-md transition-all text-slate-400 hover:text-white';
+                }
             });
             chart1.data = getKpi1ChartData(line);
             chart1.update();
@@ -713,7 +668,7 @@
             }
         }
 
-        // --- MODAL DE EDICIÓN ---
+        // --- MODAL Y FORMULARIO DINÁMICO ---
         function toggleEditModal() {
             const modal = document.getElementById('editModal');
             modal.classList.toggle('hidden');
@@ -730,8 +685,8 @@
             if (kpi === 'kpi1') {
                 container.innerHTML = `
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">Línea:</label>
-                        <select id="editKpi1Line" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                        <label class="block text-xs text-slate-400 mb-1">Línea de Producción:</label>
+                        <select id="editKpi1Line" onchange="preloadKpi1Values()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
                             <option value="ADI">ADI</option>
                             <option value="Roofing">Roofing</option>
                             <option value="Morteros">Morteros</option>
@@ -739,58 +694,87 @@
                     </div>
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">Mes:</label>
-                        <select id="editKpi1Month" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                        <select id="editKpi1Month" onchange="preloadKpi1Values()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
                             ${monthsKpi1.map((m, i) => `<option value="${i}">${m}</option>`).join('')}
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">Ton Fabricadas:</label>
-                        <input type="number" step="0.01" id="editKpi1Fab" required placeholder="Ej: 450.5" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                        <label class="block text-xs text-slate-400 mb-1">Toneladas Fabricadas:</label>
+                        <input type="number" step="0.01" id="editKpi1Fab" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">Ton Retenidas:</label>
-                        <input type="number" step="0.01" id="editKpi1Ret" required placeholder="Ej: 3.2" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                        <label class="block text-xs text-slate-400 mb-1">Toneladas Retenidas:</label>
+                        <input type="number" step="0.001" id="editKpi1Ret" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
                     </div>
                 `;
+                preloadKpi1Values();
             } else if (kpi === 'kpi2') {
                 container.innerHTML = `
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Mes:</label>
-                        <select id="editKpi2Month" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs text-slate-400 mb-1">Mes (Enero a Diciembre 2026):</label>
+                        <select id="editKpi2Month" onchange="preloadKpi2Values()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
                             ${monthsKpi2.map((m, i) => `<option value="${i}">${m}</option>`).join('')}
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">Reclamaciones 2026:</label>
-                        <input type="number" id="editKpi2Val2026" required placeholder="Ej: 2" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                        <label class="block text-xs font-semibold text-indigo-400 mb-1">Reclamos ADI (2026):</label>
+                        <input type="number" min="0" id="editKpi2Adi" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-sky-400 mb-1">Reclamos LAM (2026):</label>
+                        <input type="number" min="0" id="editKpi2Lam" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-amber-400 mb-1">Reclamos Morteros (2026):</label>
+                        <input type="number" min="0" id="editKpi2Morteros" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-emerald-400 mb-1">Reclamos Maquila (2026):</label>
+                        <input type="number" min="0" id="editKpi2Maquila" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
                     </div>
                 `;
+                preloadKpi2Values();
             } else if (kpi === 'kpi3') {
                 container.innerHTML = `
                     <div class="sm:col-span-2">
                         <label class="block text-xs text-slate-400 mb-1">Periodo:</label>
-                        <select id="editKpi3Period" onchange="fillKpi3CurrentValues()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                        <select id="editKpi3Period" onchange="preloadKpi3Values()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
                             ${periodsKpi3.map((p, i) => `<option value="${i}">${p.period}</option>`).join('')}
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">Suma Total Inventario ($ COP):</label>
-                        <input type="number" step="0.01" id="editKpi3Total" required placeholder="Ej: 9500000000" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                        <label class="block text-xs text-slate-400 mb-1">Suma Total Inventario ($):</label>
+                        <input type="number" step="0.01" id="editKpi3Total" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">Suma Inventario NC ($ COP):</label>
-                        <input type="number" step="0.01" id="editKpi3Nc" required placeholder="Ej: 1900000000" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                        <label class="block text-xs text-slate-400 mb-1">Suma Total Inventario NC ($):</label>
+                        <input type="number" step="0.01" id="editKpi3Nc" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
                     </div>
                 `;
-                setTimeout(fillKpi3CurrentValues, 10);
+                preloadKpi3Values();
             }
         }
 
-        function fillKpi3CurrentValues() {
-            const idx = document.getElementById('editKpi3Period').value;
-            const item = periodsKpi3[idx];
-            document.getElementById('editKpi3Total').value = item.totalInv > 1 ? item.totalInv : '';
-            document.getElementById('editKpi3Nc').value = item.ncInv > 0 ? item.ncInv : '';
+        function preloadKpi1Values() {
+            const line = document.getElementById('editKpi1Line').value;
+            const idx = parseInt(document.getElementById('editKpi1Month').value);
+            document.getElementById('editKpi1Fab').value = dataKpi1[line].fab[idx];
+            document.getElementById('editKpi1Ret').value = dataKpi1[line].ret[idx];
+        }
+
+        function preloadKpi2Values() {
+            const idx = parseInt(document.getElementById('editKpi2Month').value);
+            const m = dataKpi2_2026_lines[idx];
+            document.getElementById('editKpi2Adi').value = m.adi;
+            document.getElementById('editKpi2Lam').value = m.lam;
+            document.getElementById('editKpi2Morteros').value = m.morteros;
+            document.getElementById('editKpi2Maquila').value = m.maquila;
+        }
+
+        function preloadKpi3Values() {
+            const idx = parseInt(document.getElementById('editKpi3Period').value);
+            document.getElementById('editKpi3Total').value = periodsKpi3[idx].totalInv;
+            document.getElementById('editKpi3Nc').value = periodsKpi3[idx].ncInv;
         }
 
         function handleDataUpdate(e) {
@@ -799,72 +783,146 @@
 
             if (kpi === 'kpi1') {
                 const line = document.getElementById('editKpi1Line').value;
-                const mIdx = parseInt(document.getElementById('editKpi1Month').value);
-                dataKpi1[line].fab[mIdx] = parseFloat(document.getElementById('editKpi1Fab').value) || 0;
-                dataKpi1[line].ret[mIdx] = parseFloat(document.getElementById('editKpi1Ret').value) || 0;
+                const idx = parseInt(document.getElementById('editKpi1Month').value);
+                dataKpi1[line].fab[idx] = parseFloat(document.getElementById('editKpi1Fab').value) || 0;
+                dataKpi1[line].ret[idx] = parseFloat(document.getElementById('editKpi1Ret').value) || 0;
                 switchLineKpi1(line);
             } else if (kpi === 'kpi2') {
-                const mIdx = parseInt(document.getElementById('editKpi2Month').value);
-                dataKpi2_2026[mIdx] = parseInt(document.getElementById('editKpi2Val2026').value) || 0;
-                chart2.data.datasets[1].data = dataKpi2_2026;
+                const idx = parseInt(document.getElementById('editKpi2Month').value);
+                dataKpi2_2026_lines[idx] = {
+                    adi: parseInt(document.getElementById('editKpi2Adi').value) || 0,
+                    lam: parseInt(document.getElementById('editKpi2Lam').value) || 0,
+                    morteros: parseInt(document.getElementById('editKpi2Morteros').value) || 0,
+                    maquila: parseInt(document.getElementById('editKpi2Maquila').value) || 0
+                };
+                chart2.data.datasets[1].data = getKpi2MonthlyTotals();
                 chart2.update();
             } else if (kpi === 'kpi3') {
-                const pIdx = parseInt(document.getElementById('editKpi3Period').value);
-                periodsKpi3[pIdx].totalInv = parseFloat(document.getElementById('editKpi3Total').value) || 1;
-                periodsKpi3[pIdx].ncInv = parseFloat(document.getElementById('editKpi3Nc').value) || 0;
+                const idx = parseInt(document.getElementById('editKpi3Period').value);
+                periodsKpi3[idx].totalInv = parseFloat(document.getElementById('editKpi3Total').value) || 1;
+                periodsKpi3[idx].ncInv = parseFloat(document.getElementById('editKpi3Nc').value) || 0;
                 chart3.data = getKpi3ChartData();
                 chart3.update();
             }
 
             saveToLocalStorage();
-            renderAllSummaries();
+            refreshAllSummaries();
             toggleEditModal();
         }
 
+        // --- ACTUALIZACIÓN DE TARJETAS Y TABLAS ---
+        function refreshAllSummaries() {
+            // 1. Resumen KPI 1
+            let totalFab = 0, totalRet = 0;
+            ['ADI', 'Roofing', 'Morteros'].forEach(l => {
+                totalFab += dataKpi1[l].fab.reduce((a, b) => a + b, 0);
+                totalRet += dataKpi1[l].ret.reduce((a, b) => a + b, 0);
+            });
+            const pctKpi1 = totalFab > 0 ? ((totalRet / totalFab) * 100).toFixed(2) : '0.00';
+            document.getElementById('cardKpi1Fab').innerHTML = `${totalFab.toLocaleString('en-US', { maximumFractionDigits: 1 })} <span class="text-xs font-normal text-slate-400">Ton Fab</span>`;
+            document.getElementById('cardKpi1Ret').textContent = `${totalRet.toFixed(2)} T`;
+            document.getElementById('cardKpi1Pct').textContent = `${pctKpi1}%`;
+
+            // 2. Resumen KPI 2 (Suma de las 4 líneas y actualización de tarjetas)
+            let sumAdi = 0, sumLam = 0, sumMorteros = 0, sumMaquila = 0;
+            dataKpi2_2026_lines.forEach(m => {
+                sumAdi += m.adi;
+                sumLam += m.lam;
+                sumMorteros += m.morteros;
+                sumMaquila += m.maquila;
+            });
+
+            const total2026 = sumAdi + sumLam + sumMorteros + sumMaquila;
+            const total2025 = dataKpi2_2025.reduce((a, b) => a + b, 0);
+            const varPct = total2025 > 0 ? (((total2026 - total2025) / total2025) * 100).toFixed(1) : '0.0';
+
+            // Tarjetas inferiores de línea
+            document.getElementById('kpi2LineAdi').textContent = `${sumAdi} reclamos`;
+            document.getElementById('kpi2LineLam').textContent = `${sumLam} reclamos`;
+            document.getElementById('kpi2LineMorteros').textContent = `${sumMorteros} reclamos`;
+            document.getElementById('kpi2LineMaquila').textContent = `${sumMaquila} reclamos`;
+
+            // Tarjeta superior KPI 2
+            document.getElementById('cardKpi2Total2026').innerHTML = `${total2026} <span class="text-xs font-normal text-slate-400">Casos</span>`;
+            document.getElementById('cardKpi2Total2025').textContent = `${total2025} Casos`;
+            const varEl = document.getElementById('cardKpi2Var');
+            varEl.textContent = `${varPct > 0 ? '+' : ''}${varPct}% vs 2025`;
+            varEl.className = parseFloat(varPct) <= 0 ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold';
+
+            // 3. Resumen KPI 3 y Tabla
+            const tbody = document.getElementById('kpi3TableBody');
+            tbody.innerHTML = '';
+            let maxPct = 0, maxPeriod = '';
+            let lastValid = periodsKpi3[0];
+
+            periodsKpi3.forEach(p => {
+                if (p.totalInv > 1) {
+                    lastValid = p;
+                    const pct = (p.ncInv / p.totalInv) * 100;
+                    if (pct > maxPct) {
+                        maxPct = pct;
+                        maxPeriod = p.period.substring(0, 3);
+                    }
+                    const ok = pct <= TARGET_KPI3;
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-800/40 transition-colors">
+                            <td class="px-5 py-3 font-sans font-semibold text-white">${p.period}</td>
+                            <td class="px-5 py-3 text-right text-slate-300">$${p.totalInv.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
+                            <td class="px-5 py-3 text-right text-rose-400">$${p.ncInv.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
+                            <td class="px-5 py-3 text-right font-bold ${ok ? 'text-emerald-400' : 'text-rose-400'}">${pct.toFixed(2)}%</td>
+                            <td class="px-5 py-3 text-center text-slate-400">≤ 15.00%</td>
+                            <td class="px-5 py-3 text-center">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-sans font-bold ${ok ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'}">
+                                    ${ok ? 'Cumple Meta' : 'Fuera de Meta'}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+
+            const lastPct = ((lastValid.ncInv / lastValid.totalInv) * 100).toFixed(2);
+            const diff = (parseFloat(lastPct) - TARGET_KPI3).toFixed(2);
+            document.getElementById('cardKpi3LastPct').textContent = `${lastPct}%`;
+            document.getElementById('cardKpi3MaxPct').textContent = `${maxPct.toFixed(2)}% (${maxPeriod})`;
+            document.getElementById('cardKpi3Trend').textContent = diff > 0 ? `Desviado +${diff}%` : `En Meta (${diff}%)`;
+            document.getElementById('cardKpi3NcAmount').textContent = `$${Math.round(lastValid.ncInv / 1000000).toLocaleString('en-US')} M`;
+            document.getElementById('cardKpi3TotalAmount').textContent = `$${Math.round(lastValid.totalInv / 1000000).toLocaleString('en-US')} M`;
+            document.getElementById('kpi3EvolText').innerHTML = `Último registro (<b>${lastValid.period}</b>): <b>${lastPct}%</b> NC`;
+        }
+
+        // --- PERSISTENCIA EN LOCALSTORAGE ---
         function saveToLocalStorage() {
-            localStorage.setItem('kpiCalidad2026_v2', JSON.stringify({
-                kpi1: dataKpi1,
-                kpi2_2026: dataKpi2_2026,
-                kpi3: periodsKpi3
-            }));
+            localStorage.setItem('calidad_kpi1_2026', JSON.stringify(dataKpi1));
+            localStorage.setItem('calidad_kpi2_lines_2026', JSON.stringify(dataKpi2_2026_lines));
+            localStorage.setItem('calidad_kpi3_2026', JSON.stringify(periodsKpi3));
         }
 
         function loadFromLocalStorage() {
-            const saved = localStorage.getItem('kpiCalidad2026_v2');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    if (parsed.kpi1) dataKpi1 = parsed.kpi1;
-                    if (parsed.kpi2_2026) dataKpi2_2026 = parsed.kpi2_2026;
-                    if (parsed.kpi3) periodsKpi3 = parsed.kpi3;
-                } catch (err) {
-                    console.error('Error cargando datos locales:', err);
-                }
-            }
-        }
-
-        function saveTextsToStorage() {
-            localStorage.setItem('kpiCalidad2026_texts', JSON.stringify({
-                adi: document.getElementById('kpi2LineAdi').innerText,
-                lam: document.getElementById('kpi2LineLam').innerText,
-                morteros: document.getElementById('kpi2LineMorteros').innerText,
-                maquila: document.getElementById('kpi2LineMaquila').innerText
-            }));
+            const s1 = localStorage.getItem('calidad_kpi1_2026');
+            const s2 = localStorage.getItem('calidad_kpi2_lines_2026');
+            const s3 = localStorage.getItem('calidad_kpi3_2026');
+            if (s1) dataKpi1 = JSON.parse(s1);
+            if (s2) dataKpi2_2026_lines = JSON.parse(s2);
+            if (s3) periodsKpi3 = JSON.parse(s3);
         }
 
         function resetToDefaultData() {
-            localStorage.removeItem('kpiCalidad2026_v2');
-            localStorage.removeItem('kpiCalidad2026_texts');
+            if (!confirm('¿Deseas restablecer todos los datos a los valores originales?')) return;
+            localStorage.removeItem('calidad_kpi1_2026');
+            localStorage.removeItem('calidad_kpi2_lines_2026');
+            localStorage.removeItem('calidad_kpi3_2026');
             dataKpi1 = JSON.parse(JSON.stringify(defaultKpi1));
-            dataKpi2_2026 = [...defaultKpi2_2026];
+            dataKpi2_2026_lines = JSON.parse(JSON.stringify(defaultKpi2_2026_lines));
             periodsKpi3 = JSON.parse(JSON.stringify(defaultKpi3));
 
             switchLineKpi1(currentLineKpi1);
-            chart2.data.datasets[1].data = dataKpi2_2026;
+            chart2.data.datasets[1].data = getKpi2MonthlyTotals();
             chart2.update();
             chart3.data = getKpi3ChartData();
             chart3.update();
-            renderAllSummaries();
+
+            refreshAllSummaries();
             toggleEditModal();
         }
 

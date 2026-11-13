@@ -287,34 +287,7 @@
             </section>
 
         </div>
-
-        <!-- TABLA INTEGRAL DE DATOS DEL SISTEMA DE CALIDAD -->
-        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
-            <div class="p-5 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-base font-semibold text-white">Matriz Detallada de Inventario NC & Obsolescencia (KPI 3)</h2>
-                    <p class="text-xs text-slate-400">Evaluación de cumplimiento financiero contra Meta del 15.00%</p>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm text-slate-300">
-                    <thead class="bg-slate-950 text-xs text-slate-400 uppercase tracking-wider border-b border-slate-800">
-                        <tr>
-                            <th class="px-5 py-3 font-medium">Periodo</th>
-                            <th class="px-5 py-3 font-medium text-right">Suma Total Inventario</th>
-                            <th class="px-5 py-3 font-medium text-right">Suma Total NC</th>
-                            <th class="px-5 py-3 font-medium text-right">% NC Total</th>
-                            <th class="px-5 py-3 font-medium text-center">Meta Fija</th>
-                            <th class="px-5 py-3 font-medium text-center">Cumplimiento Meta</th>
-                        </tr>
-                    </thead>
-                    <tbody id="kpi3TableBody" class="divide-y divide-slate-800/60 text-xs font-mono">
-                    </tbody>
-                </table>
-            </div>
         </div>
-
     </main>
 
     <!-- FOOTER DE DERECHOS -->
@@ -859,8 +832,6 @@
             varEl.className = parseFloat(varPct) <= 0 ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold';
 
             // 3. Resumen KPI 3 y Tabla
-            const tbody = document.getElementById('kpi3TableBody');
-            tbody.innerHTML = '';
             let maxPct = 0, maxPeriod = '';
             let lastValid = periodsKpi3[0];
 

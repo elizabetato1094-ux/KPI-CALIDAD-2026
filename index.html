@@ -128,15 +128,15 @@
                             <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">KPI 1: Ton Retenidas</p>
                             <span class="px-1.5 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">Meta: ≤ 2.00%</span>
                         </div>
-                        <h3 class="text-2xl font-bold text-white" id="cardKpi1Fab">9,288.4 <span class="text-xs font-normal text-slate-400">Ton Fab</span></h3>
+                        <h3 class="text-2xl font-bold text-white" id="cardKpi1Fab">10,617.7 <span class="text-xs font-normal text-slate-400">Ton Fab</span></h3>
                     </div>
                     <span id="cardKpi1StatusBadge" class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20">
                         <i data-lucide="check-circle-2" class="w-5 h-5"></i>
                     </span>
                 </div>
                 <div class="mt-4 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/80 pt-2">
-                    <span>Retenidas: <b class="text-amber-400" id="cardKpi1Ret">49.77 T</b></span>
-                    <span>Actual: <b class="text-indigo-400" id="cardKpi1Pct">0.54%</b></span>
+                    <span>Retenidas: <b class="text-amber-400" id="cardKpi1Ret">52.27 T</b></span>
+                    <span>Actual: <b class="text-indigo-400" id="cardKpi1Pct">0.49%</b></span>
                 </div>
             </div>
 
@@ -335,47 +335,46 @@
 
         const monthsKpi1 = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
         
-        // Dataset KPI 1
+        // Dataset KPI 1 (Actualizado hasta Octubre con los datos reportados)
         let dataKpi1 = {
             ADI: {
                 color: '#3b82f6',
-                fab: [298, 527.3, 491.2, 341, 472.8, 617.2, 496, 447, 485, 0, 0, 0],
+                fab: [298, 527.3, 491.2, 341, 472.8, 617.2, 496, 447, 485, 497, 0, 0],
                 ret: [5, 0, 5, 5, 5, 0, 0.58, 0.98, 11, 0, 0, 0]
             },
             Roofing: {
                 color: '#10b981',
-                fab: [123.9, 41.9, 42.5, 53.1, 55.5, 102, 89, 74, 42, 0, 0, 0],
+                fab: [123.9, 41.9, 42.5, 53.1, 55.5, 102, 89, 74, 42, 60, 0, 0],
                 ret: [0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0]
             },
             Morteros: {
                 color: '#94a3b8',
-                fab: [581, 571, 491, 423, 317.7, 389.98, 423, 566, 726, 0, 0, 0],
-                ret: [0, 0, 0, 0, 0, 1.6, 0.24, 6.9, 3.725, 0, 0, 0]
+                fab: [581, 571, 491, 423, 317.7, 389.98, 423, 566, 726, 772.35, 0, 0],
+                ret: [0, 0, 0, 0, 0, 1.6, 0.24, 6.9, 3.725, 2.5, 0, 0]
             }
         };
 
-        // Dataset KPI 2 (Extendido hasta Mes 12 - Diciembre y desglosado por línea/maquila)
+        // Dataset KPI 2 (Extendido hasta Mes 12 - Diciembre con 2025 editable y 2026 desglosado por línea)
         const monthsKpi2 = [
             'Mes 1 (Ene)', 'Mes 2 (Feb)', 'Mes 3 (Mar)', 'Mes 4 (Abr)',
             'Mes 5 (May)', 'Mes 6 (Jun)', 'Mes 7 (Jul)', 'Mes 8 (Ago)',
             'Mes 9 (Sep)', 'Mes 10 (Oct)', 'Mes 11 (Nov)', 'Mes 12 (Dic)'
         ];
-        let dataKpi2_2025 = [2, 2, 2, 3, 4, 2, 4, 3, 8, 5, 2, 1]; // Total 2025: 38 casos
+        let dataKpi2_2025 = [2, 2, 2, 3, 4, 2, 4, 3, 8, 5, 2, 1];
         
-        // Desglose mensual 2026 por línea (Suma inicial: ADI=3, LAM=9, Morteros=2, Maquila=14 -> Total=28 casos)
         let dataKpi2_2026_lines = [
-            { adi: 0, lam: 0, morteros: 0, maquila: 1 }, // Mes 1 (1)
-            { adi: 1, lam: 3, morteros: 1, maquila: 3 }, // Mes 2 (8)
-            { adi: 0, lam: 1, morteros: 0, maquila: 1 }, // Mes 3 (2)
-            { adi: 1, lam: 1, morteros: 0, maquila: 1 }, // Mes 4 (3)
-            { adi: 0, lam: 1, morteros: 1, maquila: 1 }, // Mes 5 (3)
-            { adi: 1, lam: 1, morteros: 0, maquila: 2 }, // Mes 6 (4)
-            { adi: 0, lam: 1, morteros: 0, maquila: 1 }, // Mes 7 (2)
-            { adi: 0, lam: 1, morteros: 0, maquila: 1 }, // Mes 8 (2)
-            { adi: 0, lam: 0, morteros: 0, maquila: 2 }, // Mes 9 (2)
-            { adi: 0, lam: 0, morteros: 0, maquila: 1 }, // Mes 10 (1)
-            { adi: 0, lam: 0, morteros: 0, maquila: 0 }, // Mes 11 (Nov)
-            { adi: 0, lam: 0, morteros: 0, maquila: 0 }  // Mes 12 (Dic)
+            { adi: 0, lam: 0, morteros: 0, maquila: 1 }, // Mes 1
+            { adi: 1, lam: 3, morteros: 1, maquila: 3 }, // Mes 2
+            { adi: 0, lam: 1, morteros: 0, maquila: 1 }, // Mes 3
+            { adi: 1, lam: 1, morteros: 0, maquila: 1 }, // Mes 4
+            { adi: 0, lam: 1, morteros: 1, maquila: 1 }, // Mes 5
+            { adi: 1, lam: 1, morteros: 0, maquila: 2 }, // Mes 6
+            { adi: 0, lam: 1, morteros: 0, maquila: 1 }, // Mes 7
+            { adi: 0, lam: 1, morteros: 0, maquila: 1 }, // Mes 8
+            { adi: 0, lam: 0, morteros: 0, maquila: 2 }, // Mes 9
+            { adi: 0, lam: 0, morteros: 0, maquila: 1 }, // Mes 10
+            { adi: 0, lam: 0, morteros: 0, maquila: 0 }, // Mes 11
+            { adi: 0, lam: 0, morteros: 0, maquila: 0 }  // Mes 12
         ];
 
         // Dataset KPI 3
@@ -710,11 +709,18 @@
                 preloadKpi1Values();
             } else if (kpi === 'kpi2') {
                 container.innerHTML = `
-                    <div class="sm:col-span-2">
-                        <label class="block text-xs text-slate-400 mb-1">Mes (Enero a Diciembre 2026):</label>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Mes (Enero a Diciembre):</label>
                         <select id="editKpi2Month" onchange="preloadKpi2Values()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
                             ${monthsKpi2.map((m, i) => `<option value="${i}">${m}</option>`).join('')}
                         </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Total Reclamos Año 2025 (Mes):</label>
+                        <input type="number" min="0" id="editKpi2Year2025" class="w-full bg-slate-950 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
+                    </div>
+                    <div class="sm:col-span-2 border-t border-slate-800 pt-2 mt-1">
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-sky-400">Desglose Año 2026 por Línea / Maquila</span>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-indigo-400 mb-1">Reclamos ADI (2026):</label>
@@ -765,6 +771,7 @@
         function preloadKpi2Values() {
             const idx = parseInt(document.getElementById('editKpi2Month').value);
             const m = dataKpi2_2026_lines[idx];
+            document.getElementById('editKpi2Year2025').value = dataKpi2_2025[idx];
             document.getElementById('editKpi2Adi').value = m.adi;
             document.getElementById('editKpi2Lam').value = m.lam;
             document.getElementById('editKpi2Morteros').value = m.morteros;
@@ -789,12 +796,14 @@
                 switchLineKpi1(line);
             } else if (kpi === 'kpi2') {
                 const idx = parseInt(document.getElementById('editKpi2Month').value);
+                dataKpi2_2025[idx] = parseInt(document.getElementById('editKpi2Year2025').value) || 0;
                 dataKpi2_2026_lines[idx] = {
                     adi: parseInt(document.getElementById('editKpi2Adi').value) || 0,
                     lam: parseInt(document.getElementById('editKpi2Lam').value) || 0,
                     morteros: parseInt(document.getElementById('editKpi2Morteros').value) || 0,
                     maquila: parseInt(document.getElementById('editKpi2Maquila').value) || 0
                 };
+                chart2.data.datasets[0].data = dataKpi2_2025;
                 chart2.data.datasets[1].data = getKpi2MonthlyTotals();
                 chart2.update();
             } else if (kpi === 'kpi3') {
@@ -823,7 +832,7 @@
             document.getElementById('cardKpi1Ret').textContent = `${totalRet.toFixed(2)} T`;
             document.getElementById('cardKpi1Pct').textContent = `${pctKpi1}%`;
 
-            // 2. Resumen KPI 2 (Suma de las 4 líneas y actualización de tarjetas)
+            // 2. Resumen KPI 2 (Suma de las 4 líneas + 2025 y actualización de tarjetas)
             let sumAdi = 0, sumLam = 0, sumMorteros = 0, sumMaquila = 0;
             dataKpi2_2026_lines.forEach(m => {
                 sumAdi += m.adi;
@@ -893,30 +902,37 @@
 
         // --- PERSISTENCIA EN LOCALSTORAGE ---
         function saveToLocalStorage() {
-            localStorage.setItem('calidad_kpi1_2026', JSON.stringify(dataKpi1));
+            localStorage.setItem('calidad_kpi1_oct_2026', JSON.stringify(dataKpi1));
+            localStorage.setItem('calidad_kpi2_2025', JSON.stringify(dataKpi2_2025));
             localStorage.setItem('calidad_kpi2_lines_2026', JSON.stringify(dataKpi2_2026_lines));
             localStorage.setItem('calidad_kpi3_2026', JSON.stringify(periodsKpi3));
         }
 
         function loadFromLocalStorage() {
-            const s1 = localStorage.getItem('calidad_kpi1_2026');
-            const s2 = localStorage.getItem('calidad_kpi2_lines_2026');
+            const s1 = localStorage.getItem('calidad_kpi1_oct_2026');
+            const s2_25 = localStorage.getItem('calidad_kpi2_2025');
+            const s2_26 = localStorage.getItem('calidad_kpi2_lines_2026');
             const s3 = localStorage.getItem('calidad_kpi3_2026');
             if (s1) dataKpi1 = JSON.parse(s1);
-            if (s2) dataKpi2_2026_lines = JSON.parse(s2);
+            if (s2_25) dataKpi2_2025 = JSON.parse(s2_25);
+            if (s2_26) dataKpi2_2026_lines = JSON.parse(s2_26);
             if (s3) periodsKpi3 = JSON.parse(s3);
         }
 
         function resetToDefaultData() {
             if (!confirm('¿Deseas restablecer todos los datos a los valores originales?')) return;
             localStorage.removeItem('calidad_kpi1_2026');
+            localStorage.removeItem('calidad_kpi1_oct_2026');
+            localStorage.removeItem('calidad_kpi2_2025');
             localStorage.removeItem('calidad_kpi2_lines_2026');
             localStorage.removeItem('calidad_kpi3_2026');
             dataKpi1 = JSON.parse(JSON.stringify(defaultKpi1));
+            dataKpi2_2025 = [...defaultKpi2_2025];
             dataKpi2_2026_lines = JSON.parse(JSON.stringify(defaultKpi2_2026_lines));
             periodsKpi3 = JSON.parse(JSON.stringify(defaultKpi3));
 
             switchLineKpi1(currentLineKpi1);
+            chart2.data.datasets[0].data = dataKpi2_2025;
             chart2.data.datasets[1].data = getKpi2MonthlyTotals();
             chart2.update();
             chart3.data = getKpi3ChartData();
